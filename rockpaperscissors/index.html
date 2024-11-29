@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kő Papír Olló</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .choices {
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #result {
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        #score {
+            margin: 20px 0;
+        }
+        .waiting {
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kő Papír Olló</h1>
+    <div id="waitingRoom">
+        <h2>Várakozás másik játékosra...</h2>
+    </div>
+    <div id="gameRoom" style="display: none;">
+        <h2>Játék folyamatban</h2>
+        <div class="choices">
+            <button onclick="makeChoice('rock')">🪨 Kő</button>
+            <button onclick="makeChoice('paper')">📄 Papír</button>
+            <button onclick="makeChoice('scissors')">✂️ Olló</button>
+        </div>
+        <div id="result"></div>
+        <div id="score">
+            Győzelmek: <span id="wins">0</span>
+            Vereségek: <span id="losses">0</span>
+            Döntetlen: <span id="draws">0</span>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let wins = 0, losses = 0, draws = 0;
+
+        socket.on('gameStart', () => {
+            document.getElementById('waitingRoom').style.display = 'none';
+            document.getElementById('gameRoom').style.display = 'block';
+            document.getElementById('result').textContent = 'Válassz egy lehetőséget!';
+        });
+
+        socket.on('waitingForPlayer', () => {
+            document.getElementById('waitingRoom').style.display = 'block';
+            document.getElementById('gameRoom').style.display = 'none';
+        });
+
+        socket.on('gameResult', (data) => {
+            let resultText;
+            if (data.result === 'win') {
+                resultText = 'Nyertél! 🎉';
+                wins++;
+            } else if (data.result === 'lose') {
+                resultText = 'Vesztettél! 😢';
+                losses++;
+            } else {
+                resultText = 'Döntetlen! 🤝';
+                draws++;
+            }
+            document.getElementById('result').textContent = `${resultText} (Te: ${data.playerChoice} vs Ellenfél: ${data.opponentChoice})`;
+            updateScore();
+        });
+
+        socket.on('opponentDisconnected', () => {
+            document.getElementById('result').textContent = 'Az ellenfél kilépett. Várakozás új játékosra...';
+            document.getElementById('waitingRoom').style.display = 'block';
+            document.getElementById('gameRoom').style.display = 'none';
+        });
+
+        function makeChoice(choice) {
+            socket.emit('makeChoice', choice);
+            document.getElementById('result').textContent = 'Várakozás az ellenfélre...';
+        }
+
+        function updateScore() {
+            document.getElementById('wins').textContent = wins;
+            document.getElementById('losses').textContent = losses;
+            document.getElementById('draws').textContent = draws;
+        }
+    </script>
+</body>
+</html>
