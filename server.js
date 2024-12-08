@@ -12,31 +12,55 @@ app.get('/', (req, res) => {
 
 let waitingPlayer = null;
 let games = new Map();
+const players = new Map();
 
 io.on('connection', (socket) => {
     console.log('Játékos csatlakozott:', socket.id);
 
-    if (waitingPlayer === null) {
-        waitingPlayer = socket;
-        socket.emit('waitingForPlayer');
-    } else {
-        const player1 = waitingPlayer;
-        const player2 = socket;
-        waitingPlayer = null;
+    socket.on('playerJoin', (playerName) => {
+        console.log('Player joined with name:', playerName, 'Socket ID:', socket.id);
+        players.set(socket.id, playerName);
 
-        const gameId = player1.id + '#' + player2.id;
-        games.set(gameId, {
-            player1: { socket: player1, choice: null },
-            player2: { socket: player2, choice: null }
-        });
+        if (waitingPlayer === null) {
+            waitingPlayer = socket;
+            socket.emit('waitingForPlayer');
+        } else {
+            const player1 = waitingPlayer;
+            const player2 = socket;
+            
+            console.log('Players Map contents:', Array.from(players.entries())); // Debug log
+            console.log('Player1 ID:', player1.id, 'Name:', players.get(player1.id));
+            console.log('Player2 ID:', player2.id, 'Name:', players.get(player2.id));
 
-        player1.emit('gameStart');
-        player2.emit('gameStart');
+            const gameId = player1.id + '#' + player2.id;
+            const gameData1 = { 
+                opponentName: players.get(player2.id),
+                gameId: gameId 
+            };
+            const gameData2 = { 
+                opponentName: players.get(player1.id),
+                gameId: gameId 
+            };
 
-        [player1, player2].forEach(player => {
-            player.on('makeChoice', (choice) => handleChoice(gameId, player.id, choice));
-        });
-    }
+            console.log('Sending to player1:', gameData1); // Debug log
+            console.log('Sending to player2:', gameData2); // Debug log
+
+            // Explicit emit calls
+            io.to(player1.id).emit('gameStart', gameData1);
+            io.to(player2.id).emit('gameStart', gameData2);
+
+            waitingPlayer = null;
+
+            games.set(gameId, {
+                player1: { socket: player1, choice: null },
+                player2: { socket: player2, choice: null }
+            });
+
+            [player1, player2].forEach(player => {
+                player.on('makeChoice', (choice) => handleChoice(gameId, player.id, choice));
+            });
+        }
+    });
 
     socket.on('disconnect', () => {
         console.log('Játékos kilépett:', socket.id);
@@ -54,6 +78,8 @@ io.on('connection', (socket) => {
                 games.delete(gameId);
             }
         }
+
+        players.delete(socket.id);
     });
 });
 
