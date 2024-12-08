@@ -70,12 +70,10 @@
         }
 
         function checkStoredName() {
-            // Először localStorage ellenőrzése
             const storedName = localStorage.getItem('rpsPlayerName');
             const storedTime = localStorage.getItem('rpsNameTimestamp');
             
             if (storedName && storedTime) {
-                // Ellenőrizzük, hogy 24 óránál régebbi-e
                 const now = new Date().getTime();
                 const stored = parseInt(storedTime);
                 
@@ -86,9 +84,9 @@
                 }
             }
             
-            // Ha nincs érvényes tárolt név, megjelenítjük a név bekérő űrlapot
             document.getElementById('nameInput').style.display = 'block';
-            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('waitingRoom').style.display = 'none';
+            document.getElementById('gameRoom').style.display = 'none';
         }
 
         function saveName() {
@@ -96,12 +94,8 @@
             if (nameInput.value.trim() !== '') {
                 playerName = nameInput.value.trim();
                 
-                // Név mentése localStorage-ba időbélyeggel
                 localStorage.setItem('rpsPlayerName', playerName);
-                localStorage.setItem('rpsNameTimestamp', new Date().getTime());
-                
-                // Cookie beállítása 24 órás lejárattal
-                setCookie('rpsPlayerName', playerName, 1);
+                localStorage.setItem('rpsNameTimestamp', new Date().getTime().toString());
                 
                 startGame();
             } else {
@@ -111,9 +105,8 @@
 
         function startGame() {
             document.getElementById('nameInput').style.display = 'none';
-            document.getElementById('gameContainer').style.display = 'block';
+            document.getElementById('waitingRoom').style.display = 'block';
             
-            // Socket kapcsolat létrehozása a névvel
             socket.emit('playerJoin', playerName);
         }
 
