@@ -34,6 +34,11 @@
     </style>
 </head>
 <body>
+    <div id="nameInput" style="display: none;">
+        <h2>Kérlek add meg a neved:</h2>
+        <input type="text" id="playerName" placeholder="Játékos név">
+        <button onclick="saveName()">Belépés</button>
+    </div>
     <h1>Kő Papír Olló</h1>
     <div id="waitingRoom">
         <h2>Várakozás másik játékosra...</h2>
@@ -57,6 +62,78 @@
     <script>
         const socket = io();
         let wins = 0, losses = 0, draws = 0;
+        let playerName = '';
+        
+        // Oldal betöltésekor ellenőrizzük a tárolt nevet
+        window.onload = function() {
+            checkStoredName();
+        }
+
+        function checkStoredName() {
+            // Először localStorage ellenőrzése
+            const storedName = localStorage.getItem('rpsPlayerName');
+            const storedTime = localStorage.getItem('rpsNameTimestamp');
+            
+            if (storedName && storedTime) {
+                // Ellenőrizzük, hogy 24 óránál régebbi-e
+                const now = new Date().getTime();
+                const stored = parseInt(storedTime);
+                
+                if (now - stored < 24 * 60 * 60 * 1000) {
+                    playerName = storedName;
+                    startGame();
+                    return;
+                }
+            }
+            
+            // Ha nincs érvényes tárolt név, megjelenítjük a név bekérő űrlapot
+            document.getElementById('nameInput').style.display = 'block';
+            document.getElementById('gameContainer').style.display = 'none';
+        }
+
+        function saveName() {
+            const nameInput = document.getElementById('playerName');
+            if (nameInput.value.trim() !== '') {
+                playerName = nameInput.value.trim();
+                
+                // Név mentése localStorage-ba időbélyeggel
+                localStorage.setItem('rpsPlayerName', playerName);
+                localStorage.setItem('rpsNameTimestamp', new Date().getTime());
+                
+                // Cookie beállítása 24 órás lejárattal
+                setCookie('rpsPlayerName', playerName, 1);
+                
+                startGame();
+            } else {
+                alert('Kérlek adj meg egy nevet!');
+            }
+        }
+
+        function startGame() {
+            document.getElementById('nameInput').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+            
+            // Socket kapcsolat létrehozása a névvel
+            socket.emit('playerJoin', playerName);
+        }
+
+        // Cookie kezelő segédfüggvények
+        function setCookie(name, value, days) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+            document.cookie = name + '=' + value + ';expires=' + expires.toUTCString() + ';path=/';
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
 
         socket.on('gameStart', () => {
             document.getElementById('waitingRoom').style.display = 'none';
