@@ -286,17 +286,25 @@
         }
 
         socket.on('gameStart', (data) => {
-            console.log('Raw gameStart event data:', data); // Debug log
-            console.log('Type of data:', typeof data); // Debug log
+            console.log('Game starting with opponent:', data.opponentName);
             
+            // Várakozó szoba elrejtése
             document.getElementById('waitingRoom').style.display = 'none';
+            // Játéktér megjelenítése
             document.getElementById('gameRoom').style.display = 'block';
             document.getElementById('result').textContent = 'Válassz egy lehetőséget!';
             
+            // Ellenfél nevének megjelenítése
             if (data && data.opponentName) {
                 document.getElementById('opponentInfo').style.display = 'block';
                 document.getElementById('opponentName').textContent = data.opponentName;
             }
+
+            // Eredmények nullázása új játék kezdetekor
+            wins = 0;
+            losses = 0;
+            draws = 0;
+            updateScore();
         });
 
         socket.on('waitingForPlayer', () => {

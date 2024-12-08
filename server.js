@@ -28,7 +28,7 @@ io.on('connection', (socket) => {
             const player1 = waitingPlayer;
             const player2 = socket;
             
-            console.log('Players Map contents:', Array.from(players.entries())); // Debug log
+            console.log('Players Map contents:', Array.from(players.entries()));
             console.log('Player1 ID:', player1.id, 'Name:', players.get(player1.id));
             console.log('Player2 ID:', player2.id, 'Name:', players.get(player2.id));
 
@@ -42,10 +42,10 @@ io.on('connection', (socket) => {
                 gameId: gameId 
             };
 
-            console.log('Sending to player1:', gameData1); // Debug log
-            console.log('Sending to player2:', gameData2); // Debug log
+            console.log('Sending to player1:', gameData1);
+            console.log('Sending to player2:', gameData2);
 
-            // Explicit emit calls
+            // Azonnal küldjük mindkét játékosnak a gameStart eseményt
             io.to(player1.id).emit('gameStart', gameData1);
             io.to(player2.id).emit('gameStart', gameData2);
 
