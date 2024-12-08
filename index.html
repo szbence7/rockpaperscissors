@@ -312,17 +312,23 @@
             switch(data.result) {
                 case 'nyert':
                     resultText = 'Nyertél! 🎉';
+                    wins++;
                     break;
                 case 'vesztett':
                     resultText = 'Vesztettél! 😢';
+                    losses++;
                     break;
                 case 'döntetlen':
                     resultText = 'Döntetlen! 🤝';
+                    draws++;
                     break;
             }
             
             document.getElementById('result').textContent = 
                 `${resultText} Te: ${playerChoiceText} vs Ellenfél: ${opponentChoiceText}`;
+            
+            // Számláló frissítése
+            updateScore();
         });
 
         socket.on('opponentDisconnected', () => {
@@ -331,6 +337,10 @@
             document.getElementById('gameRoom').style.display = 'none';
             // Ellenfél nevének elrejtése
             document.getElementById('opponentInfo').style.display = 'none';
+        });
+
+        socket.on('opponentMadeChoice', () => {
+            document.getElementById('result').textContent = 'Az ellenfeled már választott, te jössz...';
         });
 
         function makeChoice(choice) {

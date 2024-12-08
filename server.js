@@ -89,8 +89,14 @@ function handleChoice(gameId, playerId, choice) {
 
     if (game.player1.socket.id === playerId) {
         game.player1.choice = choice;
+        if (!game.player2.choice) {
+            game.player2.socket.emit('opponentMadeChoice');
+        }
     } else if (game.player2.socket.id === playerId) {
         game.player2.choice = choice;
+        if (!game.player1.choice) {
+            game.player1.socket.emit('opponentMadeChoice');
+        }
     }
 
     if (game.player1.choice && game.player2.choice) {
