@@ -2,34 +2,168 @@
 <html>
 <head>
     <title>Kő Papír Olló</title>
+    <!-- Google Fonts betöltése -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f39c12;
+            --background-color: #2c3e50;
+            --text-color: #ecf0f1;
+            --button-hover: #2980b9;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
             text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
+
+        h1 {
+            font-size: 3em;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+
         .choices {
-            margin: 20px 0;
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
         }
+
         button {
-            padding: 10px 20px;
-            margin: 0 10px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #result {
-            margin: 20px 0;
+            padding: 15px 30px;
             font-size: 18px;
-            font-weight: bold;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+
+        button:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.2);
+        }
+
+        .choices button {
+            font-size: 24px;
+            padding: 20px 40px;
+            background-color: rgba(74, 144, 226, 0.2);
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            min-width: 160px;
+            text-shadow: none;
+        }
+
+        .choices button:hover {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        #result {
+            margin: 30px 0;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            color: var(--primary-color);
+        }
+
         #score {
             margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            font-size: 18px;
         }
+
+        #score span {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
         .waiting {
-            color: #666;
+            color: var(--secondary-color);
             font-style: italic;
+        }
+
+        #nameInput {
+            background-color: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            margin: 20px auto;
+            max-width: 400px;
+        }
+
+        input[type="text"] {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            background-color: rgba(255,255,255,0.9);
+            margin: 10px 0;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        #gameRoom {
+            background-color: rgba(255,255,255,0.05);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        /* Animációk a játék elemeihez */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #gameRoom, #nameInput, #waitingRoom {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Reszponzív dizájn */
+        @media (max-width: 600px) {
+            .choices {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .choices button {
+                width: 80%;
+                margin: 10px 0;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
         }
     </style>
 </head>
@@ -39,22 +173,29 @@
         <input type="text" id="playerName" placeholder="Játékos név">
         <button onclick="saveName()">Belépés</button>
     </div>
-    <h1>Kő Papír Olló</h1>
-    <div id="waitingRoom">
-        <h2>Várakozás másik játékosra...</h2>
-    </div>
-    <div id="gameRoom" style="display: none;">
-        <h2>Játék folyamatban</h2>
-        <div class="choices">
-            <button onclick="makeChoice('rock')">🪨 Kő</button>
-            <button onclick="makeChoice('paper')">📄 Papír</button>
-            <button onclick="makeChoice('scissors')">✂️ Olló</button>
+    
+    <div id="gameContent" style="display: none;">
+        <div id="playerGreeting">
+            <h2>Hello <span id="greetingName"></span>! 👋</h2>
         </div>
-        <div id="result"></div>
-        <div id="score">
-            Győzelmek: <span id="wins">0</span>
-            Vereségek: <span id="losses">0</span>
-            Döntetlen: <span id="draws">0</span>
+        
+        <h1>Kő Papír Olló</h1>
+        <div id="waitingRoom">
+            <h2>Várakozás másik játékosra...</h2>
+        </div>
+        <div id="gameRoom" style="display: none;">
+            <h2>Játék folyamatban</h2>
+            <div class="choices">
+                <button onclick="makeChoice('rock')">🪨 Kő</button>
+                <button onclick="makeChoice('paper')">📄 Papír</button>
+                <button onclick="makeChoice('scissors')">✂️ Olló</button>
+            </div>
+            <div id="result"></div>
+            <div id="score">
+                Győzelmek: <span id="wins">0</span>
+                Vereségek: <span id="losses">0</span>
+                Döntetlen: <span id="draws">0</span>
+            </div>
         </div>
     </div>
 
@@ -84,9 +225,9 @@
                 }
             }
             
+            // Ha nincs érvényes név, csak a név bekérő űrlap jelenik meg
             document.getElementById('nameInput').style.display = 'block';
-            document.getElementById('waitingRoom').style.display = 'none';
-            document.getElementById('gameRoom').style.display = 'none';
+            document.getElementById('gameContent').style.display = 'none';
         }
 
         function saveName() {
@@ -105,7 +246,8 @@
 
         function startGame() {
             document.getElementById('nameInput').style.display = 'none';
-            document.getElementById('waitingRoom').style.display = 'block';
+            document.getElementById('gameContent').style.display = 'block';
+            document.getElementById('greetingName').textContent = playerName;
             
             socket.emit('playerJoin', playerName);
         }
