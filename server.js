@@ -116,7 +116,7 @@ function handleChoice(gameId, playerId, choice) {
 }
 
 function getGameResult(choice1, choice2) {
-    if (choice1 === choice2) return 'draw';
+    if (choice1 === choice2) return 'döntetlen';
     
     const wins = {
         rock: 'scissors',
@@ -124,7 +124,7 @@ function getGameResult(choice1, choice2) {
         scissors: 'paper'
     };
     
-    return wins[choice1] === choice2 ? 'win' : 'lose';
+    return wins[choice1] === choice2 ? 'nyert' : 'vesztett';
 }
 
 const PORT = process.env.PORT || 3000;

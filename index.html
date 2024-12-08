@@ -305,19 +305,24 @@
         });
 
         socket.on('gameResult', (data) => {
+            let playerChoiceText = translateChoice(data.playerChoice);
+            let opponentChoiceText = translateChoice(data.opponentChoice);
+            
             let resultText;
-            if (data.result === 'win') {
-                resultText = 'Nyertél! 🎉';
-                wins++;
-            } else if (data.result === 'lose') {
-                resultText = 'Vesztettél! 😢';
-                losses++;
-            } else {
-                resultText = 'Döntetlen! 🤝';
-                draws++;
+            switch(data.result) {
+                case 'nyert':
+                    resultText = 'Nyertél! 🎉';
+                    break;
+                case 'vesztett':
+                    resultText = 'Vesztettél! 😢';
+                    break;
+                case 'döntetlen':
+                    resultText = 'Döntetlen! 🤝';
+                    break;
             }
-            document.getElementById('result').textContent = `${resultText} (Te: ${data.playerChoice} vs Ellenfél: ${data.opponentChoice})`;
-            updateScore();
+            
+            document.getElementById('result').textContent = 
+                `${resultText} Te: ${playerChoiceText} vs Ellenfél: ${opponentChoiceText}`;
         });
 
         socket.on('opponentDisconnected', () => {
@@ -337,6 +342,15 @@
             document.getElementById('wins').textContent = wins;
             document.getElementById('losses').textContent = losses;
             document.getElementById('draws').textContent = draws;
+        }
+
+        function translateChoice(choice) {
+            const translations = {
+                'rock': 'kő',
+                'paper': 'papír',
+                'scissors': 'olló'
+            };
+            return translations[choice] || choice;
         }
     </script>
 </body>
